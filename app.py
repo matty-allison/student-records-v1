@@ -11,6 +11,9 @@ def init_sqlite_db():
 init_sqlite_db()
 
 app = Flask(__name__)
+@app.route('/')
+def display():
+    return render_template('first.html')
 @app.route('/enter-new/')
 def enter_new_student():
     template_name = 'student.html'
@@ -38,6 +41,18 @@ def add_new_record():
         finally:
             conn.close()
             return render_template('result.html', msg=msg)
-
+@app.route('/show-records/', methods=["GET"])
+def show_records():
+    records = []
+    try:
+        with sqlite3.connect('database.db') as con:
+            cur = con.cursor()
+            cur.execute("SELECT * FROM students")
+            records = cur.fetchall()
+    except Exception as e:
+        con.rollback()
+        print("There was an error fetching results from the database.")
+    finally:
+        con.close()
 if __name__ == '__main__':
     app.run(debug=True)
